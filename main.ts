@@ -1,13 +1,13 @@
-import { App, Editor, MarkdownView, Modal, Notice, Plugin, PluginSettingTab, Setting } from 'obsidian';
+import { App, Editor, MarkdownView, Modal, Notice, Plugin, PluginSettingTab, Setting, TFile } from 'obsidian';
 
 // Remember to rename these classes and interfaces!
 
 interface MyPluginSettings {
-	mySetting: string;
+	deviceName: string;
 }
 
 const DEFAULT_SETTINGS: MyPluginSettings = {
-	mySetting: 'default'
+	deviceName: 'default'
 }
 
 export default class MyPlugin extends Plugin {
@@ -17,36 +17,36 @@ export default class MyPlugin extends Plugin {
 		await this.loadSettings();
 
 		// This creates an icon in the left ribbon.
-		const ribbonIconEl = this.addRibbonIcon('dice', 'Sample Plugin', (evt: MouseEvent) => {
+		/*const ribbonIconEl = this.addRibbonIcon('dice', 'Sample Plugin', (evt: MouseEvent) => {
 			// Called when the user clicks the icon.
 			new Notice('This is a notice!');
 		});
 		// Perform additional things with the ribbon
-		ribbonIconEl.addClass('my-plugin-ribbon-class');
+		ribbonIconEl.addClass('my-plugin-ribbon-class');*/
 
 		// This adds a status bar item to the bottom of the app. Does not work on mobile apps.
-		const statusBarItemEl = this.addStatusBarItem();
-		statusBarItemEl.setText('Status Bar Text');
+		/*const statusBarItemEl = this.addStatusBarItem();
+		statusBarItemEl.setText('Status Bar Text');*/
 
 		// This adds a simple command that can be triggered anywhere
-		this.addCommand({
+		/*this.addCommand({
 			id: 'open-sample-modal-simple',
 			name: 'Open sample modal (simple)',
 			callback: () => {
 				new SampleModal(this.app).open();
 			}
-		});
+		});*/ 
 		// This adds an editor command that can perform some operation on the current editor instance
-		this.addCommand({
+		/*this.addCommand({
 			id: 'sample-editor-command',
 			name: 'Sample editor command',
 			editorCallback: (editor: Editor, view: MarkdownView) => {
 				console.log(editor.getSelection());
 				editor.replaceSelection('Sample Editor Command');
 			}
-		});
+		});*/
 		// This adds a complex command that can check whether the current state of the app allows execution of the command
-		this.addCommand({
+		/*this.addCommand({
 			id: 'open-sample-modal-complex',
 			name: 'Open sample modal (complex)',
 			checkCallback: (checking: boolean) => {
@@ -58,12 +58,11 @@ export default class MyPlugin extends Plugin {
 					if (!checking) {
 						new SampleModal(this.app).open();
 					}
-
 					// This command will only show up in Command Palette when the check function returns true
 					return true;
 				}
 			}
-		});
+		});*/
 
 		// This adds a settings tab so the user can configure various aspects of the plugin
 		this.addSettingTab(new SampleSettingTab(this.app, this));
@@ -88,6 +87,28 @@ export default class MyPlugin extends Plugin {
 
 	async saveSettings() {
 		await this.saveData(this.settings);
+		// Update the YAML in a DeviceSettings file in the workspace
+		const filePath = 'DeviceSettings/DeviceSettings.md'; // Replace with the actual relative path
+		const file = this.app.vault.getAbstractFileByPath(filePath);
+		
+		if (file instanceof TFile) {
+			console.log("Is Existing File");
+			const content = await this.app.vault.read(file);
+			const frontmatter = this.app.metadataCache.getFileCache(file)?.frontmatter;
+			
+			if (frontmatter) {
+				const updatedFrontmatter = {
+					...frontmatter,
+					deviceName: this.settings.deviceName
+				};
+				
+				// Use JSON.stringify for YAML-like formatting
+				const yamlString = JSON.stringify(updatedFrontmatter, null, 2).replace(/"/g, '');
+				const updatedContent = content.replace(/^---\n[\s\S]*?\n---/, `---\n${yamlString}\n---`);
+				
+				await this.app.vault.modify(file, updatedContent);
+			}
+		}
 	}
 }
 
@@ -98,7 +119,7 @@ class SampleModal extends Modal {
 
 	onOpen() {
 		const {contentEl} = this;
-		contentEl.setText('Woah!');
+		// contentEl.setText('Woah!');
 	}
 
 	onClose() {
@@ -121,13 +142,13 @@ class SampleSettingTab extends PluginSettingTab {
 		containerEl.empty();
 
 		new Setting(containerEl)
-			.setName('Setting #1')
-			.setDesc('It\'s a secret')
+			.setName('Device Name')
+			.setDesc('Name your device')
 			.addText(text => text
-				.setPlaceholder('Enter your secret')
-				.setValue(this.plugin.settings.mySetting)
+				.setPlaceholder('Enter your device name.')
+				.setValue(this.plugin.settings.deviceName)
 				.onChange(async (value) => {
-					this.plugin.settings.mySetting = value;
+					this.plugin.settings.deviceName = value;
 					await this.plugin.saveSettings();
 				}));
 	}
