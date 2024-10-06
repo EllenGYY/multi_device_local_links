@@ -1,4 +1,4 @@
-import { App, Editor, MarkdownView, Modal, Notice, Plugin, PluginSettingTab, Setting, TFile } from 'obsidian';
+import { App, Editor, MarkdownFileInfo, MarkdownView, Menu, Modal, Notice, Plugin, PluginSettingTab, Setting, TFile } from 'obsidian';
 
 // Remember to rename these classes and interfaces!
 
@@ -37,14 +37,20 @@ export default class MyPlugin extends Plugin {
 			}
 		});*/ 
 		// This adds an editor command that can perform some operation on the current editor instance
-		/*this.addCommand({
-			id: 'sample-editor-command',
-			name: 'Sample editor command',
-			editorCallback: (editor: Editor, view: MarkdownView) => {
-				console.log(editor.getSelection());
-				editor.replaceSelection('Sample Editor Command');
-			}
-		});*/
+
+		// Register the context menu event
+		this.registerEvent(
+			this.app.workspace.on("editor-menu", (menu: Menu, editor: Editor, view: MarkdownView | MarkdownFileInfo) => {
+				menu.addItem((item) => {
+					item
+						.setTitle("Only show on current device")
+						.onClick(() => {
+							const selection = editor.getSelection();
+							editor.replaceSelection(`\u200B\`\`$=if (dv.page("DeviceSettings").deviceName === "${this.settings.deviceName}") { dv.span("${selection}"); }else{ dv.span("");}\`\``);
+						});
+				});
+			})
+		);
 		// This adds a complex command that can check whether the current state of the app allows execution of the command
 		/*this.addCommand({
 			id: 'open-sample-modal-complex',
