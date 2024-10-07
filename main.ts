@@ -94,26 +94,34 @@ export default class MyPlugin extends Plugin {
 	async saveSettings() {
 		await this.saveData(this.settings);
 		// Update the YAML in a DeviceSettings file in the workspace
-		const filePath = 'DeviceSettings/DeviceSettings.md'; // Replace with the actual relative path
-		const file = this.app.vault.getAbstractFileByPath(filePath);
-		
-		if (file instanceof TFile) {
-			console.log("Is Existing File");
+		const folderPath = 'DeviceSettings';
+		const filePath = `${folderPath}/DeviceSettings.md`;
+	
+		// Create folder if it doesn't exist
+		if (!await this.app.vault.adapter.exists(folderPath)) {
+			await this.app.vault.createFolder(folderPath);
+		}
+	
+		let file = this.app.vault.getAbstractFileByPath(filePath);
+	
+		if (!(file instanceof TFile)) {
+			// Create file if it doesn't exist
+			file = await this.app.vault.create(filePath, '---\ndeviceName: ' + this.settings.deviceName + '\n---\n');
+		}
+		if ((file instanceof TFile)) {
 			const content = await this.app.vault.read(file);
-			const frontmatter = this.app.metadataCache.getFileCache(file)?.frontmatter;
+			const frontmatter = this.app.metadataCache.getFileCache(file)?.frontmatter || {};
 			
-			if (frontmatter) {
-				const updatedFrontmatter = {
-					...frontmatter,
-					deviceName: this.settings.deviceName
-				};
-				
-				// Use JSON.stringify for YAML-like formatting
-				const yamlString = JSON.stringify(updatedFrontmatter, null, 2).replace(/"/g, '');
-				const updatedContent = content.replace(/^---\n[\s\S]*?\n---/, `---\n${yamlString}\n---`);
-				
-				await this.app.vault.modify(file, updatedContent);
-			}
+			const updatedFrontmatter = {
+				...frontmatter,
+				deviceName: this.settings.deviceName
+			};
+			
+			// Use JSON.stringify for YAML-like formatting
+			const yamlString = JSON.stringify(updatedFrontmatter, null, 2).replace(/"/g, '');
+			const updatedContent = content.replace(/^---\n[\s\S]*?\n---/, `---\n${yamlString}\n---`);
+			
+			await this.app.vault.modify(file, updatedContent);
 		}
 	}
 }
