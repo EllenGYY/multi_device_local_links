@@ -4,7 +4,7 @@ Obsidian offers excellent support for local file and folder links. You simply ne
 
 To address this issue, I developed a simple plugin that uses the DataviewJS inline function to determine whether specific content should appear on a particular device. 
 
-![](.\DemoAssets\teaser.png)
+![](./DemoAssets/teaser.png)
 
 
 
@@ -16,17 +16,17 @@ Here are the steps to use this plugin:
 
 3. Also make sure [**Dataview**](https://github.com/blacksmithgu/obsidian-dataview) plugin is already installed, and the JavaScript queries and inline JavaScript queries is toggled to on.
 
-   ![](.\DemoAssets\dataviewsettings.png)
+   ![](./DemoAssets/dataviewsettings.png)
 
 4. Assign a unique name to your current device under this plugin's settings (each device should have its own name).
 
-   ![](.\DemoAssets\devicenamesettings.png)
+   ![](./DemoAssets/devicenamesettings.png)
 
 5. To allow DataviewJS to read the current device name, the plugin automatically writes the device name to a file under **DeviceSettings/DeviceSettings.md**. To prevent this from being synced across devices, add this directory to the **Paths to Ignore** in your sync settings. I personally use the **Remotely Save** plugin, but I believe the official Obsidian sync service also offers this feature.
 
-   ![](.\DemoAssets\excludedir.png)
+   ![](./DemoAssets/excludedir.png)
 
 6. To add device-specific content, select the content, right-click, and choose **Only show on current device**. This will convert the content into an inline DataviewJS block, allowing you to edit it in source code mode if needed.
 
-   ![](.\DemoAssets\rightclickmenu.png)
+   ![](./DemoAssets/rightclickmenu.png)
 
